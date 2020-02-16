@@ -1,7 +1,7 @@
 import json
 import logging
 import os
-import subprocess
+import random
 import sys
 
 
@@ -12,15 +12,23 @@ logging.basicConfig(
 
 try:
     from selenium import webdriver
-except ImportError:
-    logging.exception("Selenium not installed. Installing...")
-    subprocess.call(["pip", "install", "selenium"])
+except ImportError as e:
+    logging.exception(e)
+    msg = "Selenium not installed !"
+    print(msg)
+    logging.info(msg)
     sys.exit(1)
 
+
+with open("user_agents.txt", "r") as f:
+    user_agents = f.readlines()
+    user_agents = [i.strip().strip("\n") for i in user_agents]
+user_agent = random.choice(user_agents)
 
 # chrome driver settings
 chrome_path = os.path.join(os.getcwd(), "chromedriver")
 chrome_options = webdriver.ChromeOptions()
+chrome_options.add_argument("user-agent={}".format(user_agent))
 chrome_options.add_argument("headless")
 chrome_options.add_argument("disable-logging")
 chrome_options.add_argument("log-level=3")
@@ -29,10 +37,6 @@ driver = webdriver.Chrome(chrome_options=chrome_options, executable_path=chrome_
 
 
 def get_data():
-    msg = "Scraper initialized ..."
-    print(msg)
-    logging.info(msg)
-
     data_list = []
     count = 0
 
@@ -86,12 +90,16 @@ def get_output(data_list):
 
 
 if __name__ == "__main__":
+    msg = "Scraper initialized ..."
+    print(msg)
+    logging.info(msg)
+
     try:
         data_list = get_data()
         if data_list:
             get_output(data_list)
         else:
-            msg = "No scraped data to write in output file"
+            msg = "No scraped data to write in the output file."
             print(msg)
             logging.info(msg)
     except Exception as e:
@@ -102,3 +110,7 @@ if __name__ == "__main__":
         driver.quit()
     except Exception as e:
         logging.exception(e)
+
+    msg = "Scraper stopped."
+    print(msg)
+    logging.info(msg)
