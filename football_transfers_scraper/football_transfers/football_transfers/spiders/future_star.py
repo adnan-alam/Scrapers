@@ -1,13 +1,13 @@
 import logging
 import scrapy
-from football_transfers.football_transfers.items import FootballTransfersItem
+from football_transfers.items import FootballTransfersItem
 
 
 logger = logging.getLogger(__name__)
 
 
-class TransferDataSpider(scrapy.Spider):
-    name = "transfer_data_spider"
+class FutureStarSpider(scrapy.Spider):
+    name = "future_star_spider"
     allowed_domains = ["footballtransfers.com"]
     start_urls = [
         "https://www.footballtransfers.com/en/statistics/players/actions/future-star-football-players"
@@ -35,6 +35,11 @@ class TransferDataSpider(scrapy.Spider):
         for record_data_dict in records_data_list:
             data_dict = record_data_dict.copy()
             data_dict.pop("id")
+
+            age = data_dict.get("age")
+            if age:
+                age = int(age)
+
             player_img_url = data_dict.pop("player_picture")
             team_img_url = data_dict.pop("team_picture")
             image_urls = [player_img_url, team_img_url]
